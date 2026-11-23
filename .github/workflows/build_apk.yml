@@ -84,6 +84,18 @@ jobs:
                   p.write_text(txt)
           EOF
 
+      - name: Fix android-35 android.jar if corrupted
+        run: |
+          SDK_DIR="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDKMGR=$(find "$SDK_DIR" -name "sdkmanager" -type f 2>/dev/null | head -n 1 || true)
+          if [ -n "$SDKMGR" ]; then
+            yes | "$SDKMGR" --sdk_root="$SDK_DIR" --licenses > /dev/null 2>&1 || true
+            yes | "$SDKMGR" --sdk_root="$SDK_DIR" "platforms;android-34" > /dev/null 2>&1 || true
+          fi
+          if [ -f "$SDK_DIR/platforms/android-34/android.jar" ] && [ -f "$SDK_DIR/platforms/android-35/android.jar" ]; then
+            cp -f "$SDK_DIR/platforms/android-34/android.jar" "$SDK_DIR/platforms/android-35/android.jar"
+          fi
+
       - name: Build Android APK
         run: flutter build apk --release
 
