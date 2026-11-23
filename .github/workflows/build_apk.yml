@@ -26,6 +26,9 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Ensure Android project files exist
+        run: flutter create --platforms=android --org com.humaid --project-name timering .
+
       - name: Install dependencies
         run: flutter pub get
 
