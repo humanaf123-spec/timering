@@ -27,7 +27,7 @@ jobs:
           cache: true
 
       - name: Ensure Android project files exist
-        run: flutter create --platforms=android --org com.humaid --project-name timering .
+        run: flutter create --platforms=android --org com.humaid.timeringnew --project-name timeringnew .
 
       - name: Install dependencies
         run: flutter pub get
