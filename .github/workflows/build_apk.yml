@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Configure Android SDK, NDK, and minSdk 23
+      - name: Configure Android SDK 35, minSdk 23, NDK, and Kotlin 1.9.24
         run: |
           python3 -c '
           from pathlib import Path
@@ -40,10 +40,10 @@ jobs:
 
           for p in Path("android/app").glob("build.gradle*"):
               txt = p.read_text()
-              txt = re.sub(r"compileSdk\s*=?\s*(?:flutter\.compileSdkVersion|\d+)", "compileSdk = 34", txt)
-              txt = re.sub(r"compileSdkVersion\s+(?:flutter\.compileSdkVersion|\d+)", "compileSdkVersion 34", txt)
-              txt = re.sub(r"targetSdk\s*=?\s*(?:flutter\.targetSdkVersion|\d+)", "targetSdk = 34", txt)
-              txt = re.sub(r"targetSdkVersion\s+(?:flutter\.targetSdkVersion|\d+)", "targetSdkVersion 34", txt)
+              txt = re.sub(r"compileSdk\s*=?\s*(?:flutter\.compileSdkVersion|\d+)", "compileSdk = 35", txt)
+              txt = re.sub(r"compileSdkVersion\s+(?:flutter\.compileSdkVersion|\d+)", "compileSdkVersion 35", txt)
+              txt = re.sub(r"targetSdk\s*=?\s*(?:flutter\.targetSdkVersion|\d+)", "targetSdk = 35", txt)
+              txt = re.sub(r"targetSdkVersion\s+(?:flutter\.targetSdkVersion|\d+)", "targetSdkVersion 35", txt)
 
               txt = re.sub(r"ndkVersion\s*=?\s*[\"'\'']?flutter\.ndkVersion[\"'\'']?", "ndkVersion = \"25.1.8937393\"", txt)
               txt = re.sub(r"ndkVersion\s+[\"'\'']?flutter\.ndkVersion[\"'\'']?", "ndkVersion \"25.1.8937393\"", txt)
@@ -61,7 +61,14 @@ jobs:
                   )
 
               p.write_text(txt)
-              print("Updated:", p)
+
+          for p in [Path("android/build.gradle"), Path("android/build.gradle.kts"), Path("android/settings.gradle"), Path("android/settings.gradle.kts")]:
+              if p.exists():
+                  txt = p.read_text()
+                  txt = re.sub(r"(ext\.kotlin_version\s*=\s*)[\"'\''][^\"'\'']+[\"'\'']", r"\1\"1.9.24\"", txt)
+                  txt = re.sub(r"(id\s*\(?[\"'\'']org\.jetbrains\.kotlin\.android[\"'\'']\)?\s+version\s+)[\"'\''][^\"'\'']+[\"'\'']", r"\1\"1.9.24\"", txt)
+                  txt = re.sub(r"(org\.jetbrains\.kotlin:kotlin-gradle-plugin:)[\"'\'']?[^\"'\'']+[\"'\'']?", r"\g<1>1.9.24", txt)
+                  p.write_text(txt)
           '
 
       - name: Build Android APK
