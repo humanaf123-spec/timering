@@ -29,21 +29,40 @@ jobs:
       - name: Ensure Android project files exist
         run: flutter create --platforms=android --org com.humaid --project-name timering .
 
-      - name: Update Android SDK and NDK versions
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Configure Android SDK, NDK, and minSdk 23
         run: |
           python3 -c '
           from pathlib import Path
+          import re
+
           for p in Path("android/app").glob("build.gradle*"):
               txt = p.read_text()
-              txt = txt.replace("compileSdk = flutter.compileSdkVersion", "compileSdk = 35")
-              txt = txt.replace("compileSdkVersion flutter.compileSdkVersion", "compileSdkVersion 35")
-              txt = txt.replace("ndkVersion = flutter.ndkVersion", "ndkVersion = \"25.1.8937393\"")
-              txt = txt.replace("ndkVersion flutter.ndkVersion", "ndkVersion \"25.1.8937393\"")
-              p.write_text(txt)
-          '
+              txt = re.sub(r"compileSdk\s*=?\s*flutter\.compileSdkVersion", "compileSdk = 35", txt)
+              txt = re.sub(r"compileSdkVersion\s+flutter\.compileSdkVersion", "compileSdkVersion 35", txt)
+              txt = re.sub(r"compileSdk\s*=?\s*\d+", "compileSdk = 35", txt)
+              txt = re.sub(r"compileSdkVersion\s+\d+", "compileSdkVersion 35", txt)
 
-      - name: Install dependencies
-        run: flutter pub get
+              txt = re.sub(r"ndkVersion\s*=?\s*[\"'\'']?flutter\.ndkVersion[\"'\'']?", "ndkVersion = \"25.1.8937393\"", txt)
+              txt = re.sub(r"ndkVersion\s+[\"'\'']?flutter\.ndkVersion[\"'\'']?", "ndkVersion \"25.1.8937393\"", txt)
+
+              if re.search(r"\bminSdk\b", txt):
+                  txt = re.sub(r"\bminSdk\s*=?\s*[^\s\r\n]+", "minSdk = 23", txt)
+              elif re.search(r"\bminSdkVersion\b", txt):
+                  txt = re.sub(r"\bminSdkVersion\s+[^\s\r\n]+", "minSdkVersion 23", txt)
+              else:
+                  txt = re.sub(
+                      r"(defaultConfig\s*\{)",
+                      r"\1\n        minSdk = 23",
+                      txt,
+                      count=1,
+                  )
+
+              p.write_text(txt)
+              print("Updated:", p)
+          '
 
       - name: Build Android APK
         run: flutter build apk --release
