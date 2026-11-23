@@ -29,6 +29,19 @@ jobs:
       - name: Ensure Android project files exist
         run: flutter create --platforms=android --org com.humaid --project-name timering .
 
+      - name: Update Android SDK and NDK versions
+        run: |
+          python3 -c '
+          from pathlib import Path
+          for p in Path("android/app").glob("build.gradle*"):
+              txt = p.read_text()
+              txt = txt.replace("compileSdk = flutter.compileSdkVersion", "compileSdk = 35")
+              txt = txt.replace("compileSdkVersion flutter.compileSdkVersion", "compileSdkVersion 35")
+              txt = txt.replace("ndkVersion = flutter.ndkVersion", "ndkVersion = \"25.1.8937393\"")
+              txt = txt.replace("ndkVersion flutter.ndkVersion", "ndkVersion \"25.1.8937393\"")
+              p.write_text(txt)
+          '
+
       - name: Install dependencies
         run: flutter pub get
 
