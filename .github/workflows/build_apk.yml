@@ -27,7 +27,7 @@ jobs:
           cache: true
 
       - name: Ensure Android project files exist
-        run: flutter create --platforms=android --org com.humaid.timeringnew --project-name timeringnew .
+        run: flutter create --platforms=android --org com.humaid.timeringdebug --project-name timeringdebug .
 
       - name: Install dependencies
         run: flutter pub get
@@ -82,6 +82,12 @@ jobs:
                       txt,
                   )
                   p.write_text(txt)
+
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
+          if manifest.exists():
+              mtxt = manifest.read_text()
+              mtxt = re.sub(r'android:label="[^"]*"', 'android:label="Timering Debug"', mtxt, count=1)
+              manifest.write_text(mtxt)
           EOF
 
       - name: Fix android-35 android.jar if corrupted
@@ -96,11 +102,11 @@ jobs:
             cp -f "$SDK_DIR/platforms/android-34/android.jar" "$SDK_DIR/platforms/android-35/android.jar"
           fi
 
-      - name: Build Android APK
-        run: flutter build apk --release
+      - name: Build Debug Android APK
+        run: flutter build apk --debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: timering-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: timering-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
