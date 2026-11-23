@@ -32,10 +32,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Install clean Android SDK 34 and configure Gradle
+      - name: Configure Android SDK, NDK, and minSdk 23
         run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0"
           python3 -c '
           from pathlib import Path
           import re
