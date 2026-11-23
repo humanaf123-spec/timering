@@ -32,18 +32,20 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Configure Android SDK, NDK, and minSdk 23
+      - name: Install clean Android SDK 34 and configure Gradle
         run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
           python3 -c '
           from pathlib import Path
           import re
 
           for p in Path("android/app").glob("build.gradle*"):
               txt = p.read_text()
-              txt = re.sub(r"compileSdk\s*=?\s*flutter\.compileSdkVersion", "compileSdk = 35", txt)
-              txt = re.sub(r"compileSdkVersion\s+flutter\.compileSdkVersion", "compileSdkVersion 35", txt)
-              txt = re.sub(r"compileSdk\s*=?\s*\d+", "compileSdk = 35", txt)
-              txt = re.sub(r"compileSdkVersion\s+\d+", "compileSdkVersion 35", txt)
+              txt = re.sub(r"compileSdk\s*=?\s*(?:flutter\.compileSdkVersion|\d+)", "compileSdk = 34", txt)
+              txt = re.sub(r"compileSdkVersion\s+(?:flutter\.compileSdkVersion|\d+)", "compileSdkVersion 34", txt)
+              txt = re.sub(r"targetSdk\s*=?\s*(?:flutter\.targetSdkVersion|\d+)", "targetSdk = 34", txt)
+              txt = re.sub(r"targetSdkVersion\s+(?:flutter\.targetSdkVersion|\d+)", "targetSdkVersion 34", txt)
 
               txt = re.sub(r"ndkVersion\s*=?\s*[\"'\'']?flutter\.ndkVersion[\"'\'']?", "ndkVersion = \"25.1.8937393\"", txt)
               txt = re.sub(r"ndkVersion\s+[\"'\'']?flutter\.ndkVersion[\"'\'']?", "ndkVersion \"25.1.8937393\"", txt)
